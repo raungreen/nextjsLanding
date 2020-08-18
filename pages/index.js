@@ -1,65 +1,119 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from 'next/head';
+import Layout from '../components/Layout';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import moment from 'moment';
+import Link from 'next/link';
 
-export default function Home() {
+export default function Home({ posts }) {
   return (
-    <div className={styles.container}>
+    <Layout>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Raun's Blog</title>
       </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
+      {/* Banner */}
+      <section id="banner" className="major">
+        <div className="inner">
+          <header className="major">
+            <h1>Hi, my name is Raun</h1>
+          </header>
+          <div className="content">
             <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
+              A responsive site template designed by Green Acres Media Etc...
+              <br />
+              and released under the Creative Commons.
             </p>
-          </a>
+            <ul className="actions">
+              <li>
+                <a href="#one" className="button next scrolly">
+                  Get Started
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </main>
+      </section>
+      {/* Main */}
+      <div id="main">
+        {/* One */}
+        <section id="one" className="tiles">
+          {/* Loop over posts */}
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+          {posts.map((post) => (
+            <article>
+              <span className="image">
+                <img src={`/assets/images/${post.featured_image}`} alt="" />
+              </span>
+              <header className="major">
+                <h3>
+                  <Link href={`/${post.slug}`} className="link">
+                    {post.title}
+                  </Link>
+                </h3>
+                {/* <p>Ipsum dolor sit amet</p> */}
+              </header>
+            </article>
+          ))}
+        </section>
+        {/* Two */}
+        <section id="two">
+          <div className="inner">
+            <header className="major">
+              <h2>Massa libero</h2>
+            </header>
+            <p>
+              Nullam et orci eu lorem consequat tincidunt vivamus et sagittis
+              libero. Mauris aliquet magna magna sed nunc rhoncus pharetra.
+              Pellentesque condimentum sem. In efficitur ligula tate urna.
+              Maecenas laoreet massa vel lacinia pellentesque lorem ipsum dolor.
+              Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis
+              libero. Mauris aliquet magna magna sed nunc rhoncus amet pharetra
+              et feugiat tempus.
+            </p>
+            <ul className="actions">
+              <li>
+                <a href="landing.html" className="button next">
+                  Get Started
+                </a>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </Layout>
+  );
 }
+
+export const getStaticProps = async () => {
+  const sortPosts = () => {
+    const allPosts = fs.readdirSync('posts').map((filename) => {
+      const file = fs.readFileSync(path.join('posts', filename)).toString();
+
+      const postData = matter(file);
+      // console.log(postData);
+      // console.log(postData.data.slug)
+      return {
+        content: postData.content,
+        title: postData.data.title,
+        featured_image: postData.data.featured_image,
+        date: postData.data.date,
+        slug: postData.data.slug,
+      };
+      // console.log(`name: ${data.data.date}`);
+    });
+
+    return allPosts.sort(
+      (a, b) =>
+        new moment(a.date).format('YYYY-MM-DD HH:mm:ss') <
+        new moment(b.date).format('YYYY-MM-DD HH:mm:ss')
+    );
+  };
+  console.log(sortPosts());
+  // sortPosts();
+  return {
+    props: {
+      posts: sortPosts(),
+    },
+  };
+};
